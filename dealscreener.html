@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Apex Deal Screener</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050910;
+      --panel: #111822;
+      --accent: #1dd3b0;
+      --accent-soft: rgba(29, 211, 176, 0.25);
+      --muted: #9ca8b8;
+      --border: #202b3b;
+      --danger: #ff4b6a;
+      --shadow: 0 18px 40px rgba(0, 0, 0, 0.85);
+      --radius-xl: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Times New Roman", serif;
+      background: radial-gradient(circle at top, #172235 0, #050910 50%, #02040a 100%);
+      color: #f5f7fa;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 16px 48px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1180px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .back-link {
+      font-size: 14px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+
+    .back-link span {
+      font-size: 18px;
+      transform: translateY(-1px);
+    }
+
+    header {
+      margin-bottom: 26px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 32px;
+      letter-spacing: 0.06em;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 640px;
+    }
+
+    .tagline {
+      margin-top: 8px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--accent);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 4fr);
+      gap: 22px;
+    }
+
+    @media (max-width: 880px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, rgba(29, 211, 176, 0.18), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(148, 163, 184, 0.11), transparent 50%),
+                  var(--panel);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 20px 20px 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -80px;
+      background:
+        radial-gradient(circle at 0 0, rgba(29, 211, 176, 0.22), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(59, 130, 246, 0.18), transparent 55%);
+      opacity: 0.22;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .panel-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      margin: 0 0 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    .panel-main {
+      font-size: 22px;
+      margin: 0 0 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--muted);
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .field-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(9, 14, 22, 0.85);
+      color: #f5f7fa;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-soft);
+      background: rgba(9, 14, 22, 0.95);
+    }
+
+    input::placeholder {
+      color: #65708a;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .button-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      border-radius: 999px;
+      border: 1px solid var(--accent);
+      background: radial-gradient(circle at 0 0, rgba(29, 211, 176, 0.25), transparent 55%),
+                  linear-gradient(135deg, #0c1722, #050910);
+      color: #f8fafc;
+      font-family: inherit;
+      font-size: 14px;
+      padding: 9px 18px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+    }
+
+    button span {
+      font-size: 16px;
+      transform: translateY(-1px);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 25px rgba(29, 211, 176, 0.35);
+    }
+
+    button.secondary {
+      border-color: var(--border);
+      background: #070b11;
+      color: var(--muted);
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--muted);
+    }
+
+    .pill strong {
+      color: var(--accent);
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 640px) {
+      .results-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .metric {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(8, 12, 20, 0.96);
+      padding: 10px 11px 11px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, var(--accent-soft), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .metric.highlight::before {
+      opacity: 0.7;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin-bottom: 3px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric-value {
+      font-size: 17px;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric.bad {
+      border-color: rgba(248, 113, 113, 0.7);
+    }
+
+    .metric.bad .metric-value {
+      color: var(--danger);
+    }
+
+    .note {
+      margin-top: 13px;
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 420px;
+      line-height: 1.4;
+    }
+
+    .note strong {
+      color: #e5e7eb;
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 26px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- Back to hub -->
+    <a class="back-link" href="/">
+      <span>←</span>
+      Back to Project Hub
+    </a>
+
+    <!-- Header -->
+    <header>
+      <div class="tagline">IB / PE STYLE QUICK VALUATION</div>
+      <h1>Apex Deal Screener</h1>
+      <p class="subtitle">
+        A lightweight, browser-only valuation toy. Enter basic trading stats and growth assumptions
+        to see how implied multiples and upside change under different cases.
+      </p>
+    </header>
+
+    <!-- Main layout -->
+    <div class="layout">
+      <!-- LEFT: Inputs -->
+      <section class="panel">
+        <div class="panel-inner">
+          <p class="panel-title">Inputs</p>
+          <p class="panel-main">Base Case Assumptions</p>
+
+          <form id="screener-form">
+            <div class="field-row">
+              <div>
+                <label for="ticker">Ticker</label>
+                <input id="ticker" type="text" placeholder="AAPL" />
+              </div>
+              <div>
+                <label for="price">Share price (current)</label>
+                <input id="price" type="number" step="0.01" placeholder="175" required />
+              </div>
+            </div>
+
+            <div class="field-row" style="margin-top:10px;">
+              <div>
+                <label for="eps">EPS (trailing 12M)</label>
+                <input id="eps" type="number" step="0.01" placeholder="6.20" required />
+                <div class="hint">Used to infer current P/E and future earnings.</div>
+              </div>
+              <div>
+                <label for="sector-pe">Sector median P/E</label>
+                <input id="sector-pe" type="number" step="0.1" placeholder="22" />
+                <div class="hint">Optional benchmark for your target multiple.</div>
+              </div>
+            </div>
+
+            <div class="field-row" style="margin-top:10px;">
+              <div>
+                <label for="target-pe">Target P/E</label>
+                <input id="target-pe" type="number" step="0.1" placeholder="22" required />
+                <div class="hint">What you think the stock <em>should</em> trade at.</div>
+              </div>
+              <div>
+                <label for="growth">EPS CAGR (%)</label>
+                <input id="growth" type="number" step="0.1" placeholder="8" required />
+                <div class="hint">Expected compound growth in earnings.</div>
+              </div>
+            </div>
+
+            <div class="field-row" style="margin-top:10px;">
+              <div>
+                <label for="years">Investment horizon (years)</label>
+                <input id="years" type="number" min="1" max="10" value="5" required />
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <div class="pill">
+                  <strong>Tip:</strong> Start with sector P/E for a neutral case.
+                </div>
+              </div>
+            </div>
+
+            <div class="button-row">
+              <button type="submit">
+                <span>▶</span> Run Screener
+              </button>
+              <button type="button" class="secondary" id="reset-btn">
+                Reset
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- RIGHT: Results -->
+      <section class="panel">
+        <div class="panel-inner">
+          <p class="panel-title">Output</p>
+          <p class="panel-main">Implied Valuation & Upside</p>
+
+          <div class="results-grid">
+            <div class="metric" id="metric-current-pe">
+              <div class="metric-label">Current P/E</div>
+              <div class="metric-value" id="current-pe-display">–</div>
+              <div class="metric-sub" id="current-pe-sub">Based on price ÷ EPS.</div>
+            </div>
+
+            <div class="metric" id="metric-target-pe">
+              <div class="metric-label">Target P/E</div>
+              <div class="metric-value" id="target-pe-display">–</div>
+              <div class="metric-sub" id="target-pe-sub">As defined in your case.</div>
+            </div>
+
+            <div class="metric" id="metric-implied-today">
+              <div class="metric-label">Implied price today</div>
+              <div class="metric-value" id="implied-today-display">–</div>
+              <div class="metric-sub" id="implied-today-sub">
+                What the stock would trade at if it re-rated immediately.
+              </div>
+            </div>
+
+            <div class="metric" id="metric-implied-future">
+              <div class="metric-label">Implied price at exit</div>
+              <div class="metric-value" id="implied-future-display">–</div>
+              <div class="metric-sub" id="implied-future-sub">
+                Applying growth & target multiple at your investment horizon.
+              </div>
+            </div>
+
+            <div class="metric" id="metric-upside-today">
+              <div class="metric-label">Upside – re-rating only</div>
+              <div class="metric-value" id="upside-today-display">–</div>
+              <div class="metric-sub">
+                % return if the market moves to your target P/E today.
+              </div>
+            </div>
+
+            <div class="metric" id="metric-upside-total">
+              <div class="metric-label">Total upside – rerating + growth</div>
+              <div class="metric-value" id="upside-total-display">–</div>
+              <div class="metric-sub">
+                % return vs. today’s price over your full holding period.
+              </div>
+            </div>
+          </div>
+
+          <p class="note">
+            <strong>Disclaimer:</strong> This is a simplified toy, not investment advice.
+            It ignores cash, debt, dilution, buybacks, and countless other drivers that real
+            models consider. It’s meant to show how combining <strong>earnings growth</strong>
+            and <strong>multiples</strong> translates into price-level outcomes.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      Built as a static HTML demo for James Minnehan’s portfolio. All logic runs entirely
+      in the browser – no data is fetched from external APIs.
+    </footer>
+  </div>
+
+  <script>
+    function formatCurrency(value) {
+      if (!isFinite(value)) return "–";
+      return "$" + value.toFixed(2).toString();
+    }
+
+    function formatPercent(value) {
+      if (!isFinite(value)) return "–";
+      const sign = value > 0 ? "+" : "";
+      return sign + value.toFixed(1) + "%";
+    }
+
+    const form = document.getElementById("screener-form");
+    const resetBtn = document.getElementById("reset-btn");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const price = parseFloat(document.getElementById("price").value);
+      const eps = parseFloat(document.getElementById("eps").value);
+      const sectorPEInput = document.getElementById("sector-pe").value;
+      const targetPE = parseFloat(document.getElementById("target-pe").value);
+      const growthPct = parseFloat(document.getElementById("growth").value);
+      const years = parseInt(document.getElementById("years").value, 10);
+
+      if (!price || !eps || !targetPE || !growthPct || !years) {
+        alert("Please fill in all required fields (price, EPS, target P/E, growth, years).");
+        return;
+      }
+
+      const currentPE = price / eps;
+      const sectorPE = sectorPEInput ? parseFloat(sectorPEInput) : null;
+      const g = growthPct / 100;
+
+      const impliedToday = eps * targetPE;
+      const futureEPS = eps * Math.pow(1 + g, years);
+      const impliedFuture = futureEPS * targetPE;
+
+      const upsideToday = (impliedToday / price - 1) * 100;
+      const upsideTotal = (impliedFuture / price - 1) * 100;
+
+      // Update display
+      document.getElementById("current-pe-display").textContent =
+        isFinite(currentPE) ? currentPE.toFixed(1) + "x" : "–";
+
+      const currentSub = sectorPE
+        ? `Vs sector: ${ (currentPE - sectorPE).toFixed(1) }x vs ${sectorPE.toFixed(1)}x median.`
+        : "No sector benchmark provided.";
+      document.getElementById("current-pe-sub").textContent = currentSub;
+
+      document.getElementById("target-pe-display").textContent = targetPE.toFixed(1) + "x";
+      document.getElementById("target-pe-sub").textContent = sectorPE
+        ? `Target vs sector: ${(targetPE - sectorPE).toFixed(1)}x vs ${sectorPE.toFixed(1)}x.`
+        : "You can set this equal to sector P/E for a neutral case.";
+
+      document.getElementById("implied-today-display").textContent = formatCurrency(impliedToday);
+      document.getElementById("implied-future-display").textContent = formatCurrency(impliedFuture);
+
+      document.getElementById("upside-today-display").textContent = formatPercent(upsideToday);
+      document.getElementById("upside-total-display").textContent = formatPercent(upsideTotal);
+
+      // Highlight favourable / unfavourable
+      const metricUpsideToday = document.getElementById("metric-upside-today");
+      const metricUpsideTotal = document.getElementById("metric-upside-total");
+
+      metricUpsideToday.classList.remove("bad", "highlight");
+      metricUpsideTotal.classList.remove("bad", "highlight");
+
+      if (upsideToday > 0) {
+        metricUpsideToday.classList.add("highlight");
+      } else {
+        metricUpsideToday.classList.add("bad");
+      }
+
+      if (upsideTotal > 0) {
+        metricUpsideTotal.classList.add("highlight");
+      } else {
+        metricUpsideTotal.classList.add("bad");
+      }
+    });
+
+    resetBtn.addEventListener("click", function () {
+      form.reset();
+
+      const ids = [
+        "current-pe-display",
+        "target-pe-display",
+        "implied-today-display",
+        "implied-future-display",
+        "upside-today-display",
+        "upside-total-display",
+      ];
+
+      ids.forEach(function (id) {
+        document.getElementById(id).textContent = "–";
+      });
+
+      document
+        .getElementById("metric-upside-today")
+        .classList.remove("bad", "highlight");
+      document
+        .getElementById("metric-upside-total")
+        .classList.remove("bad", "highlight");
+
+      document.getElementById("current-pe-sub").textContent = "Based on price ÷ EPS.";
+      document.getElementById("target-pe-sub").textContent =
+        "As defined in your case.";
+    });
+  </script>
+</body>
+</html>
